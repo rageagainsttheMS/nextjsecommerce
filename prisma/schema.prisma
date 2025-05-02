@@ -30,3 +30,62 @@ model Product {
   banner String?
   createdAt DateTime @default(now()) @db.Timestamp(6)
 }
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String    @default("NO_NAME")
+  email         String?   @unique(map: "user_email_idx")
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  createdAt     DateTime @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime @updatedAt
+  password      String?
+  role          String    @default("user")
+  address       Json?      @db.Json
+  paymentMethod String?
+  accounts      Account[]
+  sessions      Session[]
+ 
+  @@map("users")
+}
+
+model Account {
+  userId             String  @map("user_id") @db.Uuid
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  createdAt     DateTime @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  sessionToken String   @id @unique @map("session_token")
+  userId       String   @db.Uuid @map("user_id")
+  expires      DateTime  @db.Timestamp(6)
+  createdAt     DateTime @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
