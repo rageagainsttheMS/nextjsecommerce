@@ -28,3 +28,22 @@ export const signUpSchema = z.object({
     confirmPassword : z.string().min(3, 'Password must be at least 6 characters')
 }).refine((data) => data.password === data.confirmPassword, {message: 'Passwords do not match', path: ['confirmPassword']})
 
+export const cartItemsSchema = z.object({
+    productId : z.string().min(1, 'Product is required'),
+    name : z.string().min(1, 'Name is required'),
+    slug : z.string().min(1, 'Slug is required'),
+    qty : z.number().int().nonnegative('Quantity must be a positive number'),
+    image : z.string().min(1, 'Image is required'),
+    price : currency
+})
+
+export const cartSchema = z.object({
+    items: z.array(cartItemsSchema),
+    itemsPrice: currency,
+    totalPrice : currency,
+    shippingPrice : currency,
+    taxPrice : currency,
+    sessionCartId : z.string().min(1, 'Session cart ID is required'),
+    userId : z.string().optional().nullable()
+})
+
