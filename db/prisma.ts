@@ -5,28 +5,48 @@ import ws from 'ws';
 
 // Sets up WebSocket connections, which enables Neon to use WebSocket communication.
 neonConfig.webSocketConstructor = ws;
-const connectionString = `${process.env.DATABASE_URL}`;
+let prisma = null;
 
-// Creates a new connection pool using the provided connection string, allowing multiple concurrent connections.
-const pool = new Pool({ connectionString });
-
-// Instantiates the Prisma adapter using the Neon connection pool to handle the connection between Prisma and Neon.
-const adapter = new PrismaNeon(pool);
-
-// Extends the PrismaClient with a custom result transformer to convert the price and rating fields to strings.
-export const prisma = new PrismaClient({ adapter }).$extends({
-  result: {
-    product: {
-      price: {
-        compute(product) {
-          return product.price.toString();
+const isEdge = typeof WebSocket !== "undefined" && !process.env.NEXT_RUNTIME?.includes("nodejs");
+if (isEdge) {
+  // Edge: Use Neon driver
+  const connectionString = `${process.env.DATABASE_URL}`;
+  const pool = new Pool({ connectionString });
+  const adapter = new PrismaNeon(pool);
+    prisma = new PrismaClient({ adapter }).$extends({
+    result: {
+      product: {
+        price: {
+          compute(product) {
+            return product.price.toString();
+          },
         },
-      },
-      rating: {
-        compute(product) {
-          return product.rating.toString();
+        rating: {
+          compute(product) {
+            return product.rating.toString();
+          },
         },
       },
     },
-  },
-});
+  });
+} else {
+  // Node.js: Use standard Prisma client
+  prisma = new PrismaClient().$extends({
+    result: {
+      product: {
+        price: {
+          compute(product) {
+            return product.price.toString();
+          },
+        },
+        rating: {
+          compute(product) {
+            return product.rating.toString();
+          },
+        },
+      },
+    },
+  });
+}
+
+export { prisma };
