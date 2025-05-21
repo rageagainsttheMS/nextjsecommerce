@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { formatNumberWithDecimal } from './utils';
+import { PAYMENT_METHODS } from './constants';
 
 const currency = z.string().refine((value) => /^\d+(\.\d{2})?$/.test(formatNumberWithDecimal(Number(value))), 'Price must have exactly two decimal places');
 
@@ -56,4 +57,11 @@ export const shippingAddressSchema = z.object({
     lat : z.number().optional(),
     long : z.number().optional()
 })
+
+export const paymentMethodSchema = z.object({
+    type : z.string().min(1, 'Payment method is required')
+}).refine((data) => PAYMENT_METHODS.includes(data.type), {
+    path: ['type'],
+    message : 'Invalid payment method'
+});
 
