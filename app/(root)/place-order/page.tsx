@@ -18,6 +18,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import PlaceOrderForm from "./place-order-form";
 
 export const metadata: Metadata = {
   title: "Place Order",
@@ -43,7 +44,7 @@ const PlaceOrderPage = async () => {
     <>
       <CheckOutSteps current={3} />
       <h1 className="py-4 text-2xl">Place Order</h1>
-      <div className="grid m:grid-cols-3 md:gap-5">
+      <div className="grid md:grid-cols-3 md:gap-5">
         <div className="md:col-span-2 overflow-x-auto space-y-4">
           <Card>
             <CardContent className="p-4 gap-4">
@@ -113,7 +114,7 @@ const PlaceOrderPage = async () => {
           </Card>
         </div>
         <Card>
-          <CardContent className="p-4 gap-4 space-y-4">
+          <CardContent className="p-4 space-y-4">
             <div className="flex justify-between">
               <div>Items</div>
               <div>{formatCurrency(cart.itemsPrice)}</div>
@@ -130,6 +131,7 @@ const PlaceOrderPage = async () => {
               <div>Total</div>
               <div>{formatCurrency(cart.totalPrice)}</div>
             </div>
+            <PlaceOrderForm />
           </CardContent>
         </Card>
       </div>
