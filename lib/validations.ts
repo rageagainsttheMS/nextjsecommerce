@@ -88,3 +88,10 @@ export const inserOrderItemSchema = z.object({
 
 })
 
+export const paymentResultSchema = z.object({
+    id: z.string(),
+    status : z.string(),
+    email_address : z.string(),
+    price_paid : z.string()
+})
+
