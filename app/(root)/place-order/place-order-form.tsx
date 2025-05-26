@@ -4,18 +4,20 @@ import { Button } from "@/components/ui/button";
 import { createOrder } from "@/lib/actions/order.actions";
 import { Check, Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
 
 const PlaceOrderForm = () => {
   const router = useRouter();
-  const { pending } = useFormStatus();
+   const [pending, setPending] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
+    setPending(true);
     event.preventDefault();
     const res = await createOrder();
     if (res.redirectTo) {
       router.push(res.redirectTo);
     }
+    setPending(false);
   };
 
   const PlaceOrderButton = () => {
