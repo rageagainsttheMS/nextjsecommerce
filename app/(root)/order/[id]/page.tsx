@@ -13,7 +13,7 @@ const OrderDetailsPage = async (props: {params: Promise<{id:string}>}) => {
     const { id } = await props.params;
     const order = await getOrderByID(id);
     if(!order) notFound();
-    return ( <OrderDetailsTable order={{
+    return ( <OrderDetailsTable payPalClientId={`${process.env.PAYPAL_CLIENT_ID}`} order={{
         ...order,
         shippingAddress : order.shippingAddress as ShippingAddress
     }}/>);
