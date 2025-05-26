@@ -60,6 +60,11 @@ export function formatCurrency(amount: number | string | null) {
   }
 }
 
+export function formatNumber(number : number){
+const NUMBER_FORMATTER = new Intl.NumberFormat('en-AU');
+  return NUMBER_FORMATTER.format(number)
+}
+
 export function formatId(id: string) {
   return `..${id.substring(id.length - 6)}`;
 }
