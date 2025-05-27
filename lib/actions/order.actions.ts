@@ -253,18 +253,17 @@ export async function getOrderSummary() {
     Array<{ month: string; totalSales: Prisma.Decimal }>
   >`SELECT to_char("createdAt", 'MM/YY') as "month", sum("totalPrice") as "totalSales" FROM "Order" GROUP BY to_char("createdAt", 'MM/YY')`;
 
-  const salesData : SalesDataType[] = salesDataRaw.map((entry) => ({
+  const salesData: SalesDataType[] = salesDataRaw.map((entry) => ({
     month: entry.month,
     totalSales: Number(entry.totalSales),
   }));
 
-
   const latestSales = await prisma.order.findMany({
-    orderBy : {createdAt : 'desc'},
-    include : {
-      user : {select : {name : true}}
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: { select: { name: true } },
     },
-    take : 6
+    take: 6,
   });
 
   return {
@@ -273,7 +272,86 @@ export async function getOrderSummary() {
     userCount,
     totalSales,
     latestSales,
-    salesData
-  }
+    salesData,
+  };
+}
 
+export async function getAllOrders({
+  limit = PAGE_SIZE,
+  page,
+}: {
+  limit?: number;
+  page: number;
+}) {
+  const data = await prisma.order.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    skip: page - 1,
+    include: {
+      user: { select: { name: true } },
+    },
+  });
+
+  const dataCount = await prisma.order.count();
+  return {
+    data,
+    totalPages: Math.ceil(dataCount / limit),
+  };
+}
+
+export async function deleteOrder(orderId: string) {
+  try {
+    await prisma.order.delete({
+      where: { id: orderId },
+    });
+
+    revalidatePath("/admin/orders");
+    return {
+      success: true,
+      message: "Order deleted successfully",
+    };
+  } catch (error) {
+    return { success: false, message: formatErrors(error) };
+  }
+}
+
+export async function updateCODOrderToPaid(orderId: string) {
+  try {
+    await setOrderPaid({ orderId });
+    revalidatePath(`/order/${orderId}`);
+
+    return {
+      success: true,
+      message: "Order marked as paid",
+    };
+  } catch (error) {
+    return { success: false, message: formatErrors(error) };
+  }
+}
+
+export async function setOrderDelivered(orderId: string) {
+  try {
+    const order = await prisma.order.findFirst({
+      where: { id: orderId },
+    });
+    if (!order) throw new Error("Order not found")
+    if (order.isDelivered) throw new Error("Order is already delivered");
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        isDelivered: true,
+        deliveredAt: new Date(),
+      },
+    });
+
+    revalidatePath(`/order/${orderId}`);
+
+    return {
+      success: true,
+      message: "Order marked as delivered",
+    };
+  } catch (error) {
+    return { success: false, message: formatErrors(error) };
+  }
 }

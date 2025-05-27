@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -13,18 +12,21 @@ import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
 import { BadgeDollarSign, Barcode, CreditCard, Users } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
+import Charts from "./charts";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
 };
 
 const AdminOverviewPage = async () => {
-  const session = await auth();
-  if (session?.user?.role !== "admin") {
-    throw new Error("User is not authorised");
-  }
+  await requireAdmin();
 
   const summary = await getOrderSummary();
+
+  const chartData = {
+  salesData: summary.salesData
+};
 
   return (
     <div className="space-y-2">
@@ -82,7 +84,9 @@ const AdminOverviewPage = async () => {
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
-          <CardContent></CardContent>
+          <CardContent>
+            <Charts data={chartData} />
+          </CardContent>
         </Card>
         <Card className="col-span-3">
           <CardHeader>
