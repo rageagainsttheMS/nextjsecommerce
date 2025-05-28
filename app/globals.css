@@ -101,3 +101,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+html.dark .upload-field .text-white {
+  color : white !important;
+}
+
+html.link .upload-field .text-white {
+  color : black !important;
+}
