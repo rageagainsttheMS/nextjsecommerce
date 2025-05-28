@@ -13,6 +13,8 @@ import { formatErrors } from "../utils";
 import { ShippingAddress } from "@/app/types";
 import { auth } from "@/auth";
 import z from "zod";
+import { PAGE_SIZE } from "../constants";
+import { revalidatePath } from "next/cache";
 
 export async function signInWithCredentials(
   prevState: unknown,
@@ -168,15 +170,55 @@ export async function updateProfile(user: { name: string; email: string }) {
       data: { name: user.name },
     });
 
-     return {
+    return {
       success: true,
       message: "User updated successfully",
     };
-
   } catch (error) {
     return {
       success: false,
       message: formatErrors(error),
     };
   }
+}
+
+export async function getAllUsers({
+  limit = PAGE_SIZE,
+  page,
+}: {
+  limit?: number;
+  page: number;
+}) {
+  const data = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    skip: (page - 1) * limit,
+  });
+
+  const dataCount = await prisma.user.count();
+
+  return {
+    data,
+    totalPages: Math.ceil(dataCount / limit),
+  };
+}
+
+export async function deleteUser(id : string){
+try {
+      const userExists = await prisma.user.findFirst({
+        where : { id : id }
+      })
+
+      if(!userExists) throw new Error('User not found');
+
+      await prisma.user.delete({where : {id}});
+
+      revalidatePath('/admin/user');
+      return {
+        success : true,
+        message : 'User deleted successfully'
+      }
+    } catch (error) {
+        return {success : false, message: formatErrors(error)}
+    }
 }

@@ -105,3 +105,8 @@ export const paymentResultSchema = z.object({
     price_paid : z.string()
 })
 
+export const updateUserSchema = updateProfileSchema.extend({
+    id : z.string().min(1, 'id is required'),
+    role : z.string().min(1, 'role is required'),
+})
+
