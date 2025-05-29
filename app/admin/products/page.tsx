@@ -17,7 +17,6 @@ import Link from "next/link";
 const AdminProductsPage = async (props: {
   searchParams: Promise<{ page: string; query: string; category: string }>;
 }) => {
-
   await requireAdmin();
 
   const searchParams = await props.searchParams;
@@ -34,7 +33,19 @@ const AdminProductsPage = async (props: {
   return (
     <div className="space-y-2">
       <div className="flex-between">
-        <h1 className="h2-bold">Products</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="h2-bold">Products</h1>
+          {searchText && (
+            <div>
+              Filtered by <i>&quot;{searchText}&quot; </i>
+              <Link href="/admin/products">
+                <Button variant={"outline"} size="sm">
+                  Remove Filter
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
         <Button asChild variant={"default"}>
           <Link href="/admin/products/create">Create</Link>
         </Button>
@@ -67,7 +78,7 @@ const AdminProductsPage = async (props: {
                 <Button asChild variant={"outline"}>
                   <Link href={`/admin/products/${product.id}`}>Edit</Link>
                 </Button>
-                <DeleteDialog id={product.id} action={deleteProduct}/>
+                <DeleteDialog id={product.id} action={deleteProduct} />
               </TableCell>
             </TableRow>
           ))}

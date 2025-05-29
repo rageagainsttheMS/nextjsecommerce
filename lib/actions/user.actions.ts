@@ -4,6 +4,7 @@ import {
   shippingAddressSchema,
   signInSchema,
   signUpSchema,
+  updateUserSchema,
 } from "../validations";
 import { signIn, signOut } from "@/auth";
 import { prisma } from "@/db/prisma";
@@ -15,6 +16,7 @@ import { auth } from "@/auth";
 import z from "zod";
 import { PAGE_SIZE } from "../constants";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 export async function signInWithCredentials(
   prevState: unknown,
@@ -185,11 +187,22 @@ export async function updateProfile(user: { name: string; email: string }) {
 export async function getAllUsers({
   limit = PAGE_SIZE,
   page,
+  query
 }: {
   limit?: number;
   page: number;
+  query : string;
 }) {
+
+    const queryFilter : Prisma.UserWhereInput = query && query !== 'all' ? ({
+        name : {
+          contains : query,
+          mode : 'insensitive'
+        }
+    }) : {}
+
   const data = await prisma.user.findMany({
+    where : queryFilter,
     orderBy: { createdAt: "desc" },
     take: limit,
     skip: (page - 1) * limit,
@@ -221,4 +234,26 @@ try {
     } catch (error) {
         return {success : false, message: formatErrors(error)}
     }
+}
+
+export async function updateUser(user : z.infer<typeof updateUserSchema>){
+  try {
+    await prisma.user.update({
+      where : {id : user.id},
+      data : {
+        name : user.name,
+        role : user.role,
+      }
+    })
+
+    revalidatePath('admin/users');
+
+    return {
+      success : true,
+      message : "User updated successfully"
+    }
+
+  } catch (error) {
+      return {success : false, message: formatErrors(error)}
+  }
 }
