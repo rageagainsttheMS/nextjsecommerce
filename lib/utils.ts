@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import qs from "query-string";
+import { CURRENCY_AUD } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -45,16 +46,16 @@ export function round2(value: number | string) {
 }
 
 export function formatCurrency(amount: number | string | null) {
-  const CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
-    currency: "AUD",
+  const CURRENCY_AUD_FORMATTER = new Intl.NumberFormat("en-US", {
+    currency: CURRENCY_AUD,
     style: "currency",
     minimumFractionDigits: 2,
   });
 
   if (typeof amount === "number") {
-    return CURRENCY_FORMATTER.format(amount);
+    return CURRENCY_AUD_FORMATTER.format(amount);
   } else if (typeof amount === "string") {
-    return CURRENCY_FORMATTER.format(Number(amount));
+    return CURRENCY_AUD_FORMATTER.format(Number(amount));
   } else {
     return "NaN";
   }

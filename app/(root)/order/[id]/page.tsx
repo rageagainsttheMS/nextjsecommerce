@@ -4,22 +4,43 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import OrderDetailsTable from "./order-details-table";
 import { auth } from "@/auth";
+import Stripe from "stripe";
+import { CURRENCY_AUD } from "@/lib/constants";
 
-export const metadata : Metadata = {
-    title : 'Order Details'
-}
+export const metadata: Metadata = {
+  title: "Order Details",
+};
 
-const OrderDetailsPage = async (props: {params: Promise<{id:string}>}) => {
+const OrderDetailsPage = async (props: { params: Promise<{ id: string }> }) => {
+  const session = await auth();
+  const { id } = await props.params;
+  const order = await getOrderByID(id);
+  if (!order) notFound();
 
-    const session = await auth();
-    
-    const { id } = await props.params;
-    const order = await getOrderByID(id);
-    if(!order) notFound();
-    return ( <OrderDetailsTable isAdmin={session?.user?.role === 'admin' || false} payPalClientId={`${process.env.PAYPAL_CLIENT_ID}`} order={{
+  let client_secret = null;
+  if (!order.isPaid && order.paymentMethod === "Stripe") {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(Number(order.totalPrice)),
+      currency: CURRENCY_AUD,
+      metadata : {
+        orderId : order.id
+      }
+    });
+    client_secret = paymentIntent.client_secret;
+  }
+
+  return (
+    <OrderDetailsTable
+      isAdmin={session?.user?.role === "admin" || false}
+      payPalClientId={`${process.env.PAYPAL_CLIENT_ID}`}
+      stripeClientSecret = {client_secret}
+      order={{
         ...order,
-        shippingAddress : order.shippingAddress as ShippingAddress
-    }}/>);
-}
- 
+        shippingAddress: order.shippingAddress as ShippingAddress,
+      }}
+    />
+  );
+};
+
 export default OrderDetailsPage;

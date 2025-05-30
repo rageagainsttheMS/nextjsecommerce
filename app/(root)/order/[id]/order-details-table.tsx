@@ -29,14 +29,18 @@ import {
 import { toast, useToast } from "@/hooks/use-toast";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { CURRENCY_AUD } from "@/lib/constants";
+import StripePayment from "./stripe-payment";
 
 const OrderDetailsTable = ({
   order,
   payPalClientId,
+  stripeClientSecret,
   isAdmin,
 }: {
   order: Order;
   payPalClientId: string;
+  stripeClientSecret : string | null
   isAdmin: boolean;
 }) => {
   const {
@@ -237,7 +241,7 @@ const OrderDetailsTable = ({
               {!isPaid && paymentMethod === "PayPal" && (
                 <div>
                   <PayPalScriptProvider
-                    options={{ clientId: payPalClientId, currency: "AUD" }}
+                    options={{ clientId: payPalClientId, currency: CURRENCY_AUD }}
                   >
                     <PrintLoadingState />
                     <PayPalButtons
@@ -245,6 +249,12 @@ const OrderDetailsTable = ({
                       onApprove={handleApprovePayPalOrder}
                     ></PayPalButtons>
                   </PayPalScriptProvider>
+                </div>
+              )}
+
+              {!isPaid && paymentMethod === "Stripe" && (
+                <div>
+                 <StripePayment clientSecret={stripeClientSecret} priceInCents={Number(order.totalPrice) * 100} orderId={order.id}/>
                 </div>
               )}
 
