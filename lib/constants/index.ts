@@ -35,3 +35,9 @@ export const PRODUCT_DEFAULTS = {
 }
 
 export const USER_ROLES = ['admin', 'user']
+
+export const REVIEW_DEFAULT = {
+    title : '',
+    comment : '',
+    rating : 0
+}
