@@ -38,6 +38,12 @@ const OrderDetailsPage = async (props: { params: Promise<{ id: string }> }) => {
       order={{
         ...order,
         shippingAddress: order.shippingAddress as ShippingAddress,
+        paymentResult : {
+            email_address : '',
+            id : '',
+            price_paid : '',
+            status : ''
+        }
       }}
     />
   );
