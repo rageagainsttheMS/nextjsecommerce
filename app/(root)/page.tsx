@@ -7,6 +7,8 @@ import { LATEST_PRODUCTS_LIMIT } from "@/lib/constants";
 import { Product } from "../types";
 import ProductCarousel from "@/components/shared/product/product-carousel";
 import ViewAllProductsButton from "@/components/view-all-products-button";
+import IconBoxes from "@/components/icon-boxes";
+import DealCountdown from "@/components/deal-countdown";
 const Home = async () => {
   const latestProducts: Product[] = await getLatestProducts();
 
@@ -24,6 +26,8 @@ const Home = async () => {
         limit={LATEST_PRODUCTS_LIMIT}
       />
       <ViewAllProductsButton/>
+      <DealCountdown/>
+      <IconBoxes/>
     </>
   );
 };
